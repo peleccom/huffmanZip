@@ -3,7 +3,7 @@
 
 long dict[256];
 #define BUFFER_SIZE 1024
-char buffer[BUFFER_SIZE];
+unsigned char buffer[BUFFER_SIZE];
 
 int create_archive(char *filename);
 int extract_archive(char *filename);
@@ -37,8 +37,12 @@ return result;
 
 void dict_statistic(){
     int i;
+    printf("Bytes statistic:\n");
     for(i=0; i<256; i++)
-	printf(" %i - %li\n",i, dict[i]);
+        if ((i < 127) & (i > 32))
+	    printf("byte %3i(ANSI '%c') - %li\n",i,i, dict[i]);
+        else
+            printf("byte %3i           - %li\n",i,dict[i]);
 }
 
 int create_archive(char *filename){
@@ -50,10 +54,11 @@ int create_archive(char *filename){
         perror("Can't open file");
         return 1;
     }
-    while( n = fread(&buffer,sizeof(char),BUFFER_SIZE, fp)){
+    while( n = fread(&buffer,sizeof(unsigned char),BUFFER_SIZE, fp)){
         for(i=0; i < n;i++){
             dict[buffer[i]]++;
 	}
+
     }
     dict_statistic();
     fclose(fp);
