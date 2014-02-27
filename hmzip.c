@@ -18,7 +18,7 @@ if (argc == 1){
 }
 char *opts = "c:x:";
 int opt;
-int result = 0;
+int result = 1;
 while ((opt = getopt(argc, argv, opts)) != -1){
     switch(opt){
         case 'c':
@@ -54,7 +54,7 @@ int create_archive(char *filename){
         perror("Can't open file");
         return 1;
     }
-    while( n = fread(&buffer,sizeof(unsigned char),BUFFER_SIZE, fp)){
+    while( n = fread(buffer,sizeof(*buffer),BUFFER_SIZE, fp)){
         for(i=0; i < n;i++){
             dict[buffer[i]]++;
 	}
