@@ -24,6 +24,6 @@ typedef struct tree_node_t{
 	unsigned char data;
 } tree_node_t;
 
-void generate_tree(frequency_array_t *frequency_array);
-
+codes_array_t* generate_codes(frequency_array_t *frequency_array);
+void free_codes(codes_array_t* codes);
 #endif

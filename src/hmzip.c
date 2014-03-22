@@ -1,7 +1,12 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include "hmzip.h"
+#include "huffman_tree.h"
+#include <inttypes.h>
+#include <getopt.h>
 
-long dict[256];
+frequency_array_t frequency_array;
 #define BUFFER_SIZE 1024
 unsigned char buffer[BUFFER_SIZE];
 
@@ -35,14 +40,16 @@ while ((opt = getopt(argc, argv, opts)) != -1){
 return result;
 }
 
+
+
 void dict_statistic(){
     int i;
     printf("Bytes statistic:\n");
     for(i=0; i<256; i++)
         if ((i < 127) & (i > 32))
-	    printf("byte %3i(ANSI '%c') - %li\n",i,i, dict[i]);
+	    printf("byte %3i(ANSI '%c') - %"PRIu64"\n",i,i, frequency_array.freq[i]);
         else
-            printf("byte %3i           - %li\n",i,dict[i]);
+            printf("byte %3i           - %"PRIu64"\n",i,frequency_array.freq[i]);
 }
 
 int create_archive(char *filename){
@@ -56,13 +63,15 @@ int create_archive(char *filename){
     }
     while( n = fread(buffer,sizeof(*buffer),BUFFER_SIZE, fp)){
         for(i=0; i < n;i++){
-            dict[buffer[i]]++;
+            frequency_array.freq[buffer[i]]++;
 	}
 
     }
-    dict_statistic();
     fclose(fp);
     
+    dict_statistic();
+    codes_array_t *codes = generate_codes(&frequency_array);
+    free_codes(codes);
 }
 
 

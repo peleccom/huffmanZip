@@ -31,7 +31,6 @@ void rebuild_tree(sorted_queue_t queue){
 }
 
 void walk(char *path, tree_node_t *node, codes_array_t *codes){
-	printf("%s\n",path);
 	if (node->is_leaf){
 		char *str = malloc((strlen(path)+ 1) * sizeof(char));
 		strcpy(str, path);
@@ -62,12 +61,12 @@ codes_array_t* generate_codes_map(sorted_queue_t queue){
 	codes = malloc(sizeof(codes_array_t));
 	for(i=0;i<256;i++)
 		codes->code[i] = NULL;
-	tree_node_t *root = sorted_queue_pop(queue);
+	tree_node_t *root = sorted_queue_peek(queue);
 	walk("", root, codes);
 	return codes;
 }
 
-void free_codes_map(codes_array_t* codes){
+void free_codes(codes_array_t* codes){
 	int i;
 	for(i=0;i<256;i++)
 		FREE(codes->code[i])
@@ -75,7 +74,7 @@ void free_codes_map(codes_array_t* codes){
 }
 
 
-void generate_tree(frequency_array_t *frequency_array){
+codes_array_t* generate_codes(frequency_array_t *frequency_array){
 	int i;
 	sorted_queue_t queue;
 	tree_node_t *node;
@@ -95,15 +94,8 @@ void generate_tree(frequency_array_t *frequency_array){
 	codes_array_t* codes = generate_codes_map(queue);
 	while(sorted_queue_count(queue)){
 		node  = sorted_queue_pop(queue);
-		printf("%"PRIu64"\n" , node->weight);
 		FREE(node);
 	}
-	
-	for(i=0;i<256;i++)
-	{
-		
-		if (codes->code[i])
-			printf("%i - %s\n",i, codes->code[i]);
-	}
 	sorted_queue_free(queue);
+	return codes;
 }
