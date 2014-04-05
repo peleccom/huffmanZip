@@ -104,14 +104,13 @@ codes_array_t* generate_codes(frequency_array_t *frequency_array){
 
 
 tree_node_t* generate_tree(codes_array_t* codes){
- // generate tree from codes_array
     int i;
     int j;
     int l;
     tree_node_t *root;
     tree_node_t *cur_node;
     tree_node_t *new_node;
-    char *s
+    char *s;
     root = malloc(sizeof(tree_node_t));
     root->is_leaf = 1;
     root->left = NULL;
@@ -120,13 +119,13 @@ tree_node_t* generate_tree(codes_array_t* codes){
     cur_node = root;
     for(i=0; i<256; i++){
       cur_node = root;
-      s = codes[i];
+      s = codes->code[i];
       l = strlen(s);
-      for(j=0; j< l; j++){
-	 if (cur_node->is_leaf){
-	   cur_node->is_leaf = 0;
-	   new_node = malloc(sizeof(tree_node_t));	   
-	   if (s[j] == "1")
+     for(j=0; j< l; j++){
+		if (cur_node->is_leaf){
+	    cur_node->is_leaf = 0;
+	    new_node = malloc(sizeof(tree_node_t));	   
+	   if (s[j] == '1')
 	     cur_node->right = new_node;
 	   else
 	     cur_node->left = new_node;
@@ -134,7 +133,7 @@ tree_node_t* generate_tree(codes_array_t* codes){
 	 }
 	 else
 	 {
-	   if (s[j] == "1")
+	   if (s[j] == '1')
 	     cur_node = cur_node->right;
 	   else
 	     cur_node = cur_node->left;
