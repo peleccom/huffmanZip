@@ -72,9 +72,21 @@ void free_codes(codes_array_t* codes){
 	for(i=0;i<256;i++)
 		//free strings
 		FREE(codes->code[i])
-	FREE(codes);
+}
+void free_tree_node(tree_node_t* node){
+	if (!(node->is_leaf))
+	{
+		if (node->left)
+			free_tree_node(node->left);
+		if (node->right)
+			free_tree_node(node->right);
+	}
+	FREE(node);
 }
 
+void free_tree(tree_node_t* root){
+	free_tree_node(root);
+}
 
 codes_array_t* generate_codes(frequency_array_t *frequency_array){
 	int i;
@@ -118,31 +130,52 @@ tree_node_t* generate_tree(codes_array_t* codes){
     root->data = 0;
     cur_node = root;
     for(i=0; i<256; i++){
-      cur_node = root;
-      s = codes->code[i];
-      l = strlen(s);
-     for(j=0; j< l; j++){
-		if (cur_node->is_leaf){
-	    cur_node->is_leaf = 0;
-	    new_node = malloc(sizeof(tree_node_t));	   
-	   if (s[j] == '1')
-	     cur_node->right = new_node;
-	   else
-	     cur_node->left = new_node;
-	   cur_node = new_node;
-	 }
-	 else
-	 {
-	   if (s[j] == '1')
-	     cur_node = cur_node->right;
-	   else
-	     cur_node = cur_node->left;
-	 }
+		if (!codes->code[i]) continue;
+		cur_node = root;
+		s = codes->code[i];
+		l = strlen(s);
+		for(j=0; j< l; j++){
+			if (cur_node->is_leaf){
+				cur_node->is_leaf = 0;
+				cur_node->left = NULL;
+				cur_node->right = NULL;
+				new_node = malloc(sizeof(tree_node_t));
+				new_node->is_leaf = 1;	   
+				if (s[j] == '1')
+					cur_node->right = new_node;
+				else
+					cur_node->left = new_node;
+				cur_node = new_node;
+			}
+			else
+			{
+				if (s[j] == '1')
+				{
+					if(cur_node->right)
+						cur_node = cur_node->right;
+					else{
+						new_node = malloc(sizeof(tree_node_t));
+						new_node->is_leaf = 1;
+						cur_node->right = new_node;
+						cur_node = new_node;
+					}
+				}
+				else{
+					if (cur_node->left)
+						cur_node = cur_node->left;
+					else{
+						new_node = malloc(sizeof(tree_node_t));
+						new_node->is_leaf = 1;
+						cur_node->left = new_node;
+						cur_node = new_node;
+					}
+				}
+			}
 	 
-      }
-	 
-    
-      
+		}    
+		cur_node->is_leaf = 1;
+		cur_node->data = i; 
     }
+    return root;
 	
 }

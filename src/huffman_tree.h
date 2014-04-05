@@ -26,4 +26,9 @@ typedef struct tree_node_t{
 
 codes_array_t* generate_codes(frequency_array_t *frequency_array);
 void free_codes(codes_array_t* codes);
+void free_tree(tree_node_t *root);
+/**
+ * generate huffman tree from codes map
+ */
+tree_node_t* generate_tree(codes_array_t* codes);
 #endif

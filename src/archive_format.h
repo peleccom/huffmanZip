@@ -3,6 +3,8 @@
 #include "huffman_tree.h"
 #include <stdio.h>
 #include <string.h>
+
+#define BUFFER_LENGTH 2048
 /* void pack_file(FILE *orig_fp, 
 			FILE *archive_fp, codes_array_t *codes);
 void unpack_file(FILE *archive_fp, 
@@ -25,6 +27,11 @@ void file_write_string(char *s, FILE *fp);
  * read string from file 
  */
 char* file_read_string(FILE *fp);
+
+
+void file_write_encrypted_data(FILE *fp, FILE *archive, codes_array_t *codes);
+
+void file_read_decrypted_data(FILE *archive, FILE *fp, tree_node_t *root, int64_t data_size);
 
 void write_encrypt(unsigned char *data, int64_t size, codes_array_t codes, FILE *fp);
 #endif

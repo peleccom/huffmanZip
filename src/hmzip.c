@@ -3,15 +3,19 @@
 #include <stdlib.h>
 #include "hmzip.h"
 #include "huffman_tree.h"
+#include "archive_format.h"
+#include "my_utils.h"
 #include <inttypes.h>
 #include <getopt.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 frequency_array_t frequency_array;
 #define BUFFER_SIZE 1024
 unsigned char buffer[BUFFER_SIZE];
 
-int create_archive(char *filename);
-int extract_archive(char *filename);
+int create_archive(char *filename, char *archive_name);
+int extract_archive(char *archive, char *file);
 
 int main(int argc, char *argv[]){
 if (argc == 1){
@@ -27,10 +31,10 @@ int result = 1;
 while ((opt = getopt(argc, argv, opts)) != -1){
     switch(opt){
         case 'c':
-	   result = create_archive(optarg);
+	   result = create_archive(optarg, "archive.hz");
            break;
         case 'x':
-           result = extract_archive(optarg);
+           result = extract_archive(optarg, "archive");
            break;
 	default:
            printf("sss");
@@ -52,13 +56,20 @@ void dict_statistic(){
             printf("byte %3i           - %"PRIu64"\n",i,frequency_array.freq[i]);
 }
 
-int create_archive(char *filename){
+int create_archive(char *filename, char *archive_name){
     FILE *fp;
+    FILE *archive_fp;
     int n;
     short i;
+    struct stat stat_s;
+    int64_t data_size;
     printf("create\n");
     if ((fp=fopen(filename, "rb")) == NULL){
         perror("Can't open file");
+        return 1;
+    }
+    if ((archive_fp=fopen(archive_name, "wr")) == NULL){
+        perror("Can't create archive file");
         return 1;
     }
     while( n = fread(buffer,sizeof(*buffer),BUFFER_SIZE, fp)){
@@ -67,16 +78,41 @@ int create_archive(char *filename){
 	}
 
     }
-    fclose(fp);
-    
+    stat(filename, &stat_s);
+    data_size = stat_s.st_size;
     dict_statistic();
     codes_array_t *codes = generate_codes(&frequency_array);
+	fseek(fp, 0, SEEK_SET);
+	file_write_header(archive_fp, codes, data_size);
+    file_write_encrypted_data(fp, archive_fp, codes);
+	fclose(fp);
+    fclose(archive_fp);
     free_codes(codes);
+    FREE(codes);
 }
 
 
 
 
-int extract_archive(char *filename){
-    printf("extracting\n");
+int extract_archive(char *archive_filename, char *filename){
+	FILE *fp;
+	FILE *archive;
+	codes_array_t codes;
+	tree_node_t *root;
+	int64_t data_size;
+	if ((archive=fopen(archive_filename, "rb")) == NULL){
+		perror("Can't open file");
+        return 1;
+	} 
+	if ((fp=fopen(filename, "w+")) == NULL){
+		perror("Can't create file");
+        return 1;
+	} 
+	file_read_header(archive, &codes, &data_size);
+	root = generate_tree(&codes);
+	free_codes(&codes);
+	file_read_decrypted_data(archive, fp,root, data_size);
+	free_tree(root);
+	fclose(fp);
+	fclose(archive);
 }
