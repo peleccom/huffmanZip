@@ -2,7 +2,7 @@ Huffman archiver, written in C
 
 
 Archive file format:
-1 byte - count of codes in codemap
+2 bytes - count of codes in codemap
 each code entry : 
 	1 byte - char code
 	2 bytes - string size

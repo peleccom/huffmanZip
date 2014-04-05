@@ -14,5 +14,6 @@
 		if (ptr == NULL)										\
 		   printf("Bad ptr in %s: %u\n", __FILE__, __LINE__);	\
 	} while(0);
-	
+
+
 #endif

@@ -2,7 +2,7 @@
 void file_write_header(FILE *archive, codes_array_t *codes, int64_t data_size){
 	unsigned char c;
 	int i;
-	unsigned char codes_count = 0;
+	short codes_count = 0;
 	long pos_codes_count, pos_data_begin;
 	pos_codes_count = ftell(archive);
 	fwrite(&codes_count, sizeof(codes_count), 1, archive);
@@ -26,7 +26,7 @@ void file_write_header(FILE *archive, codes_array_t *codes, int64_t data_size){
 void file_read_header(FILE *archive, codes_array_t *codes, int64_t *data_size){
 	unsigned char i;
 	int j;
-	unsigned char codes_count;
+	short codes_count;
 	fread(&codes_count, sizeof(codes_count),1,archive);
 	memset(codes->code, 0, sizeof(codes->code)); 
 	for (j=0;j< codes_count; j++){
@@ -49,7 +49,6 @@ void file_write_encrypted_data(FILE *fp, FILE *archive, codes_array_t *codes){
 	current_byte = 0;
 	while(readed_bytes = fread(buffer_read, sizeof(*buffer_read),BUFFER_LENGTH, fp))
 	{
-		printf("readed %i\n", readed_bytes);
 		for(i=0; i<readed_bytes; i++){
 			code_s = codes->code[buffer_read[i]];
 			l = strlen(code_s);
@@ -63,7 +62,7 @@ void file_write_encrypted_data(FILE *fp, FILE *archive, codes_array_t *codes){
 					
 					index_out_buf++;
 					if ((index_out_buf + 1)>= BUFFER_LENGTH){
-						fwrite(buffer_write, sizeof(*buffer_write), index_out_buf+1, archive);
+						fwrite(buffer_write, sizeof(*buffer_write), index_out_buf, archive);
 						index_out_buf = 0;
 					}
 				}
@@ -71,7 +70,6 @@ void file_write_encrypted_data(FILE *fp, FILE *archive, codes_array_t *codes){
 					current_byte |= pos;
 				else
 					current_byte &= ~pos;
-				printf("%x %c\n", current_byte, code_s[j]);
  
 				pos >>= 1;
 			}
@@ -105,13 +103,12 @@ void file_read_decrypted_data(FILE *archive, FILE *fp, tree_node_t *root, int64_
 				else
 					current_node = current_node->left;
 				if (current_node->is_leaf){
-					printf("byte %x\n", current_node->data);
 					buffer_write[index_out_buf] = current_node->data;
 					current_node = root;
 					index_out_buf++;
 					total_decrypted++;
 					if ((index_out_buf + 1) >= BUFFER_LENGTH){
-						fwrite(buffer_write, sizeof(*buffer_write), index_out_buf+1, fp);
+						fwrite(buffer_write, sizeof(*buffer_write), index_out_buf, fp);
 						index_out_buf = 0;
 					}
 				}
