@@ -1,5 +1,10 @@
 Huffman archiver, written in C
 
+usage exmples:
+	./hmzip -c file.txt
+		Create archive with filename file.txt.hz
+	./hmzip -x file.txt.hz
+		Extract file file.txt
 
 Archive file format:
 2 bytes - count of codes in codemap
