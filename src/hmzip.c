@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "hmzip.h"
 #include "huffman_tree.h"
 #include "archive_format.h"
 #include "my_utils.h"
@@ -11,11 +10,13 @@
 #include <sys/stat.h>
 
 frequency_array_t frequency_array;
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 12000
 unsigned char buffer[BUFFER_SIZE];
+int verbose;
 
 int create_archive(char *filename, char *archive_name);
 int extract_archive(char *archive, char *file);
+char* replace_ext(char *filename, char *new_ext);
 
 int main(int argc, char *argv[]){
 if (argc == 1){
@@ -23,21 +24,33 @@ if (argc == 1){
     printf("usage:\n");
     printf("hmzip -c <filename> : create new archive from file <filename>\n");
     printf("hmzip -x <archive_filename>: extract file from archive\n");
+    printf("use -v for verbose mode\n");
     return 0;
 }
-char *opts = "c:x:";
+char *out_filename;
+char *opts = "vc:x:";
 int opt;
 int result = 1;
+verbose = 0;
 while ((opt = getopt(argc, argv, opts)) != -1){
     switch(opt){
+		case 'v':
+			verbose++;
+			break;
         case 'c':
-	   result = create_archive(optarg, "archive.hz");
+			out_filename = malloc((strlen(optarg) +4 )* sizeof(char));
+			strcpy(out_filename, optarg);
+			strcat(out_filename, ".hz");
+			result = create_archive(optarg, out_filename);
+			FREE(out_filename);
            break;
         case 'x':
-           result = extract_archive(optarg, "archive");
+           out_filename = replace_ext(optarg, "");
+           result = extract_archive(optarg, out_filename);
+           FREE(out_filename);
            break;
 	default:
-           printf("sss");
+           printf("Invalid options\n");
 	   break;
     }
 }
@@ -63,7 +76,6 @@ int create_archive(char *filename, char *archive_name){
     short i;
     struct stat stat_s;
     int64_t data_size;
-    printf("create\n");
     if ((fp=fopen(filename, "rb")) == NULL){
         perror("Can't open file");
         return 1;
@@ -80,7 +92,8 @@ int create_archive(char *filename, char *archive_name){
     }
     stat(filename, &stat_s);
     data_size = stat_s.st_size;
-    dict_statistic();
+    if (verbose)
+		dict_statistic();
     codes_array_t *codes = generate_codes(&frequency_array);
 	fseek(fp, 0, SEEK_SET);
 	file_write_header(archive_fp, codes, data_size);
@@ -91,7 +104,24 @@ int create_archive(char *filename, char *archive_name){
     FREE(codes);
 }
 
-
+char* replace_ext(char *filename, char *new_ext){
+	int i;
+	int l  = strlen(filename);
+	int e_l = strlen(new_ext);
+	char *s = malloc(sizeof(char) * (l + 1 + e_l));
+	int pos;
+	for(i=l-1; i>=0;i--)
+	{
+		if ((filename[i] == '.') || (filename[i] == '/') || (filename[i] =='\\'))
+			break;
+	}
+	if (i > 0) 
+		pos = i;
+	else
+		pos = l;
+	strncpy(s, filename, pos);
+	strcat(s, new_ext);
+}
 
 
 int extract_archive(char *archive_filename, char *filename){
