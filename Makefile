@@ -1,7 +1,7 @@
 .PHONY : clean all
 
 
-CFLAGS = -g --std=c99
+CFLAGS = -g -Wall --std=c99
 BUILDDIR=out
 
 

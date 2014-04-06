@@ -48,7 +48,7 @@ void file_write_encrypted_data(FILE *fp, FILE *archive, codes_array_t *codes){
 	int index_out_buf = 0;
 	pos = 0x80;
 	current_byte = 0;
-	while(readed_bytes = fread(buffer_read, sizeof(*buffer_read),BUFFER_LENGTH, fp))
+	while((readed_bytes = fread(buffer_read, sizeof(*buffer_read),BUFFER_LENGTH, fp)))
 	{
 		for(i=0; i<readed_bytes; i++){
 			int byte = buffer_read[i];
@@ -95,7 +95,7 @@ void file_read_decrypted_data(FILE *archive, FILE *fp, tree_node_t *root, int64_
 	tree_node_t *current_node;
 	pos = 0x80;
 	current_node = root;
-	while(readed_bytes = fread(buffer_read, sizeof(*buffer_read),BUFFER_LENGTH, archive)){
+	while((readed_bytes = fread(buffer_read, sizeof(*buffer_read),BUFFER_LENGTH, archive))){
 		for (i=0; i<readed_bytes; i++){
 			while(pos){
 				if (total_decrypted == data_size){

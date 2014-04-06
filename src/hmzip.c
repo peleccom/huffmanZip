@@ -93,7 +93,7 @@ int create_archive(char *filename, char *archive_name){
         perror("Can't create archive file");
         return 1;
     }
-    while( n = fread(buffer,sizeof(*buffer),BUFFER_SIZE, fp)){
+    while( (n = fread(buffer,sizeof(*buffer),BUFFER_SIZE, fp))){
         for(i=0; i < n;i++){
             frequency_array.freq[buffer[i]]++;
 	}
@@ -111,6 +111,7 @@ int create_archive(char *filename, char *archive_name){
     fclose(archive_fp);
     free_codes(codes);
     FREE(codes);
+    return 0;
 }
 
 char* replace_ext(char *filename, char *new_ext){
@@ -130,6 +131,7 @@ char* replace_ext(char *filename, char *new_ext){
 		pos = l;
 	strncpy(s, filename, pos);
 	strcat(s, new_ext);
+	return s;
 }
 
 
@@ -154,4 +156,5 @@ int extract_archive(char *archive_filename, char *filename){
 	free_tree(root);
 	fclose(fp);
 	fclose(archive);
+	return 0;
 }
