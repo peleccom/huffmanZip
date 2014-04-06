@@ -40,6 +40,7 @@ void file_read_header(FILE *archive, codes_array_t *codes, int64_t *data_size){
 void file_write_encrypted_data(FILE *fp, FILE *archive, codes_array_t *codes){
 	unsigned char buffer_read[BUFFER_LENGTH];
 	unsigned char buffer_write[BUFFER_LENGTH];
+	int codes_length[256] = {0};
 	int readed_bytes;
 	int i,j,l;
 	unsigned char current_byte, pos;
@@ -50,8 +51,11 @@ void file_write_encrypted_data(FILE *fp, FILE *archive, codes_array_t *codes){
 	while(readed_bytes = fread(buffer_read, sizeof(*buffer_read),BUFFER_LENGTH, fp))
 	{
 		for(i=0; i<readed_bytes; i++){
-			code_s = codes->code[buffer_read[i]];
-			l = strlen(code_s);
+			int byte = buffer_read[i];
+			code_s = codes->code[byte];
+			if (codes_length[byte] == 0)
+				codes_length[byte]  = strlen(code_s);
+			l = codes_length[byte] ;
 			for (j=0; j<l; j++)
 			{
 				if (pos == 0) {

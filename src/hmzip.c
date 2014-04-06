@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 
 frequency_array_t frequency_array;
-#define BUFFER_SIZE 12000
+#define BUFFER_SIZE 65536
 unsigned char buffer[BUFFER_SIZE];
 int verbose;
 
@@ -18,13 +18,17 @@ int create_archive(char *filename, char *archive_name);
 int extract_archive(char *archive, char *file);
 char* replace_ext(char *filename, char *new_ext);
 
-int main(int argc, char *argv[]){
-if (argc == 1){
-    printf("Huffman zipping\n");
+
+void usage(){
+	printf("****Huffman zipping****\n");
     printf("usage:\n");
     printf("hmzip -c <filename> : create new archive from file <filename>\n");
     printf("hmzip -x <archive_filename>: extract file from archive\n");
     printf("use -v for verbose mode\n");
+}
+int main(int argc, char *argv[]){
+if (argc == 1){
+	usage();
     return 0;
 }
 char *out_filename;
@@ -43,18 +47,23 @@ while ((opt = getopt(argc, argv, opts)) != -1){
 			strcat(out_filename, ".hz");
 			result = create_archive(optarg, out_filename);
 			FREE(out_filename);
+			return result;
            break;
         case 'x':
            out_filename = replace_ext(optarg, "");
            result = extract_archive(optarg, out_filename);
            FREE(out_filename);
+           return result;
            break;
 	default:
            printf("Invalid options\n");
 	   break;
     }
+    
 }
-return result;
+	printf("invalid input\n");
+	usage();
+	return 1;
 }
 
 
@@ -73,7 +82,7 @@ int create_archive(char *filename, char *archive_name){
     FILE *fp;
     FILE *archive_fp;
     int n;
-    short i;
+    int i;
     struct stat stat_s;
     int64_t data_size;
     if ((fp=fopen(filename, "rb")) == NULL){

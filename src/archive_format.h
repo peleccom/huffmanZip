@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BUFFER_LENGTH 2048
+#define BUFFER_LENGTH 65536
 /* void pack_file(FILE *orig_fp, 
 			FILE *archive_fp, codes_array_t *codes);
 void unpack_file(FILE *archive_fp, 
