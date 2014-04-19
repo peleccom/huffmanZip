@@ -34,6 +34,12 @@ void walk(char *path, tree_node_t *node, codes_array_t *codes){
 	if (node->is_leaf){
 		char *str = malloc((strlen(path)+ 1) * sizeof(char));
 		strcpy(str, path);
+		if (strlen(str) == 0)
+			{
+				FREE(str);
+				str = malloc(2 * sizeof(char));
+				strcpy(str, "0");
+			}
 		codes->code[node->data] = str;
 		FREE(node);
 		return;
