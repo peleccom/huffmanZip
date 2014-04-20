@@ -138,9 +138,7 @@ int create_archive(char *filename, char *archive_name){
     if (verbose)
 		dict_statistic();
     codes_array_t *codes = generate_codes(&frequency_array);
-	for (i =0;i<256;i++)
-{
-	fseek(fp, 0, SEEK_SET);}
+	fseek(fp, 0, SEEK_SET);
 	file_write_header(archive_fp, codes, data_size);
     file_write_encrypted_data(fp, archive_fp, codes);
 	fclose(fp);

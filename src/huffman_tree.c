@@ -68,6 +68,7 @@ codes_array_t* generate_codes_map(sorted_queue_t queue){
 	codes = malloc(sizeof(codes_array_t));
 	for(i=0;i<256;i++)
 		codes->code[i] = NULL;
+	if (!sorted_queue_count(queue)) return codes;
 	tree_node_t *root = sorted_queue_pop(queue);
 	walk("", root, codes);
 	return codes;
