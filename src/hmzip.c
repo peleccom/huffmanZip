@@ -27,40 +27,74 @@ void usage(){
     printf("use -v for verbose mode\n");
 }
 int main(int argc, char *argv[]){
-if (argc == 1){
-	usage();
-    return 0;
-}
-char *out_filename;
-char *opts = "vc:x:";
-int opt;
-int result = 1;
-verbose = 0;
-while ((opt = getopt(argc, argv, opts)) != -1){
-    switch(opt){
-		case 'v':
-			verbose++;
-			break;
-        case 'c':
-			out_filename = malloc((strlen(optarg) +4 )* sizeof(char));
-			strcpy(out_filename, optarg);
-			strcat(out_filename, ".hz");
-			result = create_archive(optarg, out_filename);
-			FREE(out_filename);
-			return result;
-           break;
-        case 'x':
-           out_filename = replace_ext(optarg, "");
-           result = extract_archive(optarg, out_filename);
-           FREE(out_filename);
-           return result;
-           break;
-	default:
-           printf("Invalid options\n");
-	   break;
-    }
+	if (argc == 1){
+		usage();
+		return 0;
+	}
+	char *out_filename = NULL;
+	char *default_out_filename = NULL;
+	char *input_filename = NULL;
+	char *opts = "vc:x:o:";
+	int opt;
+	int result = 1;
+	int create_mode ,extract_mode;
+	create_mode  = extract_mode = 0;
+
+	verbose = 0;
+	while ((opt = getopt(argc, argv, opts)) != -1){
+		switch(opt){
+			case 'v':
+				verbose++;
+				break;
+			case 'c':
+				if (extract_mode)
+				{
+					printf("Invalid options combination\n");
+					usage();
+					return 2;
+				}
+				default_out_filename = malloc((strlen(optarg) +4 )* sizeof(char));
+				strcpy(default_out_filename, optarg);
+				strcat(default_out_filename, ".hz");
+				out_filename = default_out_filename;
+				input_filename = optarg;
+				create_mode = 1;
+				break;
+			case 'x':
+				if (create_mode){
+					printf("Invalid options combination\n");
+					usage();
+					return 2;
+				}
+				default_out_filename = replace_ext(optarg, "");
+				out_filename = default_out_filename;
+				input_filename = optarg;
+				extract_mode = 1;
+				break;
+			case 'o':
+				out_filename = optarg;
+				break;
+			default:
+				printf("Invalid options\n");
+				break;
+		}
     
-}
+	}
+	if (create_mode)
+	{
+		result = create_archive(input_filename, out_filename);
+		FREE(default_out_filename);
+		return result;
+	}
+	if (extract_mode){
+		if (!out_filename){
+			out_filename = replace_ext(optarg, "");
+		}
+		result = extract_archive(input_filename, out_filename);
+		FREE(default_out_filename);
+		return result;
+	}
+	
 	printf("invalid input\n");
 	usage();
 	return 1;
@@ -104,7 +138,9 @@ int create_archive(char *filename, char *archive_name){
     if (verbose)
 		dict_statistic();
     codes_array_t *codes = generate_codes(&frequency_array);
-	fseek(fp, 0, SEEK_SET);
+	for (i =0;i<256;i++)
+{
+	fseek(fp, 0, SEEK_SET);}
 	file_write_header(archive_fp, codes, data_size);
     file_write_encrypted_data(fp, archive_fp, codes);
 	fclose(fp);
